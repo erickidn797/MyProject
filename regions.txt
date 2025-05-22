@@ -1,0 +1,23 @@
+150403: Jambi, Kabupaten Batanghari, Kecamatan Muara Bulian
+320301: Jawa Barat, Kabupaten Bandung, Kecamatan Andir
+150404: Jambi, Kabupaten Batanghari, Kecamatan Muarabulian
+150405: Jambi, Kabupaten Batanghari, Kecamatan Bajubang
+150406: Jambi, Kabupaten Batanghari, Kecamatan Pemayung
+320302: Jawa Barat, Kabupaten Bandung, Kecamatan Baleendah
+320303: Jawa Barat, Kabupaten Bandung, Kecamatan Cangkuang
+320304: Jawa Barat, Kabupaten Bandung, Kecamatan Ciparay
+320305: Jawa Barat, Kabupaten Bandung, Kecamatan Dayeuhkolot
+320306: Jawa Barat, Kabupaten Bandung, Kecamatan Kertasari
+320307: Jawa Barat, Kabupaten Bandung, Kecamatan Majalaya
+320308: Jawa Barat, Kabupaten Bandung, Kecamatan Nagreg
+320309: Jawa Barat, Kabupaten Bandung, Kecamatan Pangalengan
+320310: Jawa Barat, Kabupaten Bandung, Kecamatan Rancaekek
+320311: Jawa Barat, Kabupaten Bandung, Kecamatan Soreang
+320312: Jawa Barat, Kabupaten Bandung, Kecamatan Ujungberung
+320313: Jawa Barat, Kabupaten Bandung, Kecamatan Cileunyi
+320314: Jawa Barat, Kabupaten Bandung, Kecamatan Cileunyi
+320315: Jawa Barat, Kabupaten Bandung, Kecamatan Cimenyan
+320316: Jawa Barat, Kabupaten Bandung, Kecamatan Cisarua
+320317: Jawa Barat, Kabupaten Bandung, Kecamatan Cileunyi
+320318: Jawa Barat, Kabupaten Bandung, Kecamatan Cileunyi
+320319: Jawa Barat, Kabupaten Bandung, Kecamatan Cileunyi
