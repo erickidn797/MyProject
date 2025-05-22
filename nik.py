@@ -6,19 +6,21 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 
 # Minimal example of regional code mapping for demonstration
 # Key is 6-digit regional code, value is a dict with province, regency, district
-REGIONS = {
-    "150403": {
-        "province": "Jambi",
-        "regency": "Kabupaten Batanghari",
-        "district": "Kecamatan Muara Bulian"
-    },
-    "320301": {
-        "province": "Jawa Barat",
-        "regency": "Kabupaten Bandung",
-        "district": "Kecamatan Andir"
-    },
-    # Add more region codes as needed here...
-}
+def load_regions(file_path):
+    regions = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            code, province, regency, district = line.strip().split(': ')
+            province, regency, district = province.strip(), regency.strip(), district.strip()
+            regions[code] = {
+                "province": province,
+                "regency": regency,
+                "district": district
+            }
+    return regions
+
+# Contoh penggunaan
+REGIONS = load_regions('regions.txt')
 
 def decode_nik(nik: str):
     """
