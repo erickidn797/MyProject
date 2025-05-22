@@ -1,13 +1,9 @@
 import os
 import re
 from datetime import datetime
+from telegram.ext import ApplicationBuilder, MessageHandler, filters
 from telegram import Update
-from telegram.ext import (
-    ApplicationBuilder,
-    ContextTypes,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import ContextTypes
 from aiohttp import web
 
 # Load regional data
@@ -101,26 +97,24 @@ async def cek_nik(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(response)
 
 # Entry point
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Hello!")
+
 async def main():
-    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-    PORT = int(os.getenv("PORT", "8443"))
-    HOST = "0.0.0.0"
-    APP_URL = os.getenv("RENDER_EXTERNAL_URL")  # ex: https://your-bot.onrender.com
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    app = ApplicationBuilder().token(token).build()
 
-    if not TOKEN or not APP_URL:
-        print("Token atau URL tidak ditemukan.")
-        return
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    application = ApplicationBuilder().token(TOKEN).build()
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, cek_nik))
+    port = int(os.environ.get("PORT", 8443))
+    url = os.environ.get("RENDER_EXTERNAL_URL")  # misalnya: https://your-app.onrender.com
 
-    await application.bot.set_webhook(f"{APP_URL}/webhook")
-    await application.run_webhook(
-        listen=HOST,
-        port=PORT,
-        webhook_path="/webhook",
+    await app.run_webhook(
+        listen="0.0.0.0",
+        port=port,
+        webhook_url=f"{url}/webhook",  # path bisa disisipkan di URL ini
     )
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import asyncio
     asyncio.run(main())
