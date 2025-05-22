@@ -52,7 +52,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(response)
 
 if __name__ == '__main__':
-    TOKEN = "ISI_DENGAN_TOKEN_BOT_KAMU"
+    TOKEN = "7624773525:AAEYsETwvrxmnnSVyASVP1Vm6tamGIB02nQ"
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
