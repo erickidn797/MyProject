@@ -7,20 +7,33 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 # Minimal example of regional code mapping for demonstration
 # Key is 6-digit regional code, value is a dict with province, regency, district
 def load_regions(file_path):
-    REGIONS = {}
+    regions = {}
     with open(file_path, 'r') as file:
         for line in file:
-            code, province, regency, district = line.strip().split(': ')
-            province, regency, district = province.strip(), regency.strip(), district.strip()
-            REGIONS[code] = {
+            # Pisahkan berdasarkan ':' untuk ambil kode dan deskripsi
+            parts = line.strip().split(':', 1)
+            if len(parts) != 2:
+                continue  # Lewati baris yang tidak sesuai format
+
+            code = parts[0].strip()
+            location_parts = parts[1].split(',')
+
+            if len(location_parts) != 3:
+                continue  # Lewati baris yang tidak memiliki 3 bagian lokasi
+
+            province = location_parts[0].strip()
+            regency = location_parts[1].strip()
+            district = location_parts[2].strip()
+
+            regions[code] = {
                 "province": province,
                 "regency": regency,
                 "district": district
             }
-    return REGIONS
+    return regions
 
 # Contoh penggunaan
-REGIONS = load_regions('regions.txt')
+regions = load_regions('regions.txt')
 
 def decode_nik(nik: str):
     """
@@ -41,7 +54,7 @@ def decode_nik(nik: str):
     reg_number = nik[12:]
     
     # Lookup region info
-    region_info = REGIONS.get(region_code, {
+    region_info = regions.get(region_code, {
         "province": "Unknown",
         "regency": "Unknown",
         "district": "Unknown"
