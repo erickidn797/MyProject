@@ -2,29 +2,29 @@ import os
 import re
 from datetime import datetime
 from telegram import Update
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
+from telegram.ext import (
+    ApplicationBuilder,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
+from aiohttp import web
 
-# Minimal example of regional code mapping for demonstration
-# Key is 6-digit regional code, value is a dict with province, regency, district
+# Load regional data
 def load_regions(file_path):
     regions = {}
     with open(file_path, 'r') as file:
         for line in file:
-            # Pisahkan berdasarkan ':' untuk ambil kode dan deskripsi
             parts = line.strip().split(':', 1)
             if len(parts) != 2:
-                continue  # Lewati baris yang tidak sesuai format
-
+                continue
             code = parts[0].strip()
             location_parts = parts[1].split(',')
-
             if len(location_parts) != 3:
-                continue  # Lewati baris yang tidak memiliki 3 bagian lokasi
-
+                continue
             province = location_parts[0].strip()
             regency = location_parts[1].strip()
             district = location_parts[2].strip()
-
             regions[code] = {
                 "province": province,
                 "regency": regency,
@@ -32,58 +32,40 @@ def load_regions(file_path):
             }
     return regions
 
-# Contoh penggunaan
 regions = load_regions('regions.txt')
 
+# Decode NIK
 def decode_nik(nik: str):
-    """
-    Decode the Indonesian NIK (Nomor Induk Kependudukan).
-
-    Format:
-    - 6 digits: region code (province+regency+district)
-    - 6 digits: date of birth DDMMYY (for females, day + 40)
-    - 4 digits: registration number
-
-    Returns dict with extracted info or None if invalid
-    """
     if len(nik) != 16 or not nik.isdigit():
         return None
-    
     region_code = nik[:6]
     dob_part = nik[6:12]
     reg_number = nik[12:]
-    
-    # Lookup region info
+
     region_info = regions.get(region_code, {
         "province": "Unknown",
         "regency": "Unknown",
         "district": "Unknown"
     })
-    
-    # Parse date of birth and gender
+
     day = int(dob_part[:2])
     month = int(dob_part[2:4])
     year = int(dob_part[4:6])
-    
-    # Gender detection and adjustment for female
+
     if day > 40:
         gender = "Perempuan"
         day -= 40
     else:
         gender = "Laki-laki"
-        
-    # Year adjustment (assuming 1900-1999, can be improved for 2000+)
-    if year >= 0 and year <= 20: # assume year between 2000 and 2020 for example
-        full_year = 2000 + year
-    else:
-        full_year = 1900 + year
-    
+
+    full_year = 2000 + year if year <= 20 else 1900 + year
+
     try:
         dob = datetime(full_year, month, day)
         dob_str = dob.strftime("%d %B %Y")
     except ValueError:
         dob_str = "Tanggal lahir tidak valid"
-    
+
     return {
         "nik": nik,
         "province": region_info["province"],
@@ -94,14 +76,15 @@ def decode_nik(nik: str):
         "registration_number": reg_number
     }
 
-def cek_nik(update: Update, context: CallbackContext) -> None:
+# Bot handler
+async def cek_nik(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = update.message.text.strip()
     match = re.match(r'^Cek (\d{16})$', message_text, re.IGNORECASE)
     if match:
         nik = match.group(1)
         decoded = decode_nik(nik)
         if decoded is None:
-            response = "NIK yang Anda masukkan tidak valid. Pastikan formatnya benar dan terdiri dari 16 digit angka."
+            response = "NIK tidak valid. Format harus 16 digit angka."
         else:
             response = (
                 f"NIK: {decoded['nik']}\n"
@@ -110,27 +93,34 @@ def cek_nik(update: Update, context: CallbackContext) -> None:
                 f"Kecamatan: {decoded['district']}\n"
                 f"Tanggal Lahir: {decoded['birth_date']}\n"
                 f"Jenis Kelamin: {decoded['gender']}\n"
-                f"Nomor Urut Registrasi: {decoded['registration_number']}"
+                f"Nomor Registrasi: {decoded['registration_number']}"
             )
     else:
-        response = "Format salah! Gunakan format: Cek [NIK]\nContoh: Cek 1504030911840001"
-    
-    update.message.reply_text(response)
+        response = "Format salah! Gunakan: Cek [NIK]\nContoh: Cek 1504030911840001"
 
-def main() -> None:
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    if not token:
-        print("Error: TELEGRAM_BOT_TOKEN environment variable tidak ditemukan.")
+    await update.message.reply_text(response)
+
+# Entry point
+async def main():
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    PORT = int(os.getenv("PORT", "8443"))
+    HOST = "0.0.0.0"
+    APP_URL = os.getenv("RENDER_EXTERNAL_URL")  # ex: https://your-bot.onrender.com
+
+    if not TOKEN or not APP_URL:
+        print("Token atau URL tidak ditemukan.")
         return
-    
-    updater = Updater(token)
-    dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, cek_nik))
+    application = ApplicationBuilder().token(TOKEN).build()
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, cek_nik))
 
-    updater.start_polling()
-    updater.idle()
+    await application.bot.set_webhook(f"{APP_URL}/webhook")
+    await application.run_webhook(
+        listen=HOST,
+        port=PORT,
+        webhook_path="/webhook",
+    )
 
-if __name__ == '__main__':
-    main()
-
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
