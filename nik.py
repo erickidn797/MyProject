@@ -7,17 +7,17 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 # Minimal example of regional code mapping for demonstration
 # Key is 6-digit regional code, value is a dict with province, regency, district
 def load_regions(file_path):
-    regions = {}
+    REGIONS = {}
     with open(file_path, 'r') as file:
         for line in file:
             code, province, regency, district = line.strip().split(': ')
             province, regency, district = province.strip(), regency.strip(), district.strip()
-            regions[code] = {
+            REGIONS[code] = {
                 "province": province,
                 "regency": regency,
                 "district": district
             }
-    return regions
+    return REGIONS
 
 # Contoh penggunaan
 REGIONS = load_regions('regions.txt')
