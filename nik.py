@@ -74,6 +74,29 @@ def decode_nik(nik: str):
         "registration_number": reg_number
     }
 
+async def start(update, context):
+    await update.message.reply_text("Bot is running with webhook!")
+
+def main():
+    # Ambil token dari environment
+    token = os.environ.get("TELEGRAM_TOKEN")
+    if not token:
+        raise ValueError("TELEGRAM_TOKEN environment variable not set")
+
+    # Inisialisasi aplikasi bot
+    app = Application.builder().token(token).build()
+
+    # Tambahkan command handler
+    app.add_handler(CommandHandler("start", start))
+
+    # Jalankan webhook tanpa async
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=8443,
+        url_path=token,
+        webhook_url=f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}/{token}"
+    )
+    
 # Bot handler
 async def cek_nik(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = update.message.text.strip()
@@ -98,24 +121,7 @@ async def cek_nik(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(response)
 
-# Entry point
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Hello!")
 
-async def main():
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    app = ApplicationBuilder().token(token).build()
-
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    port = int(os.environ.get("PORT", 8443))
-    url = os.environ.get("RENDER_EXTERNAL_URL")  # misalnya: https://your-app.onrender.com
-
-    await app.run_webhook(
-        listen="0.0.0.0",
-        port=port,
-        webhook_url=f"{url}/webhook",  # path bisa disisipkan di URL ini
-    )
 
 if __name__ == "__main__":
     try:
