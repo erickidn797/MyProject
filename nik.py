@@ -125,9 +125,3 @@ if __name__ == "__main__":
             loop.run_until_complete(main())
         else:
             raise
-
-# Fix untuk warning: coroutine 'Application.shutdown' was never awaited
-await application.shutdown()
-
-# Fix untuk warning: coroutine 'Application._bootstrap_initialize' was never awaited
-await application._bootstrap_initialize()
