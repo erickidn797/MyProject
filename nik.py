@@ -78,9 +78,9 @@ async def start(update, context):
     await update.message.reply_text("Bot is running with webhook!")
 
 async def main():
-    token = os.environ.get("TELEGRAM_TOKEN")
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
     if not token:
-        raise ValueError("TELEGRAM_TOKEN environment variable not set")
+        raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set")
 
     app = Application.builder().token(token).build()
     app.add_handler(CommandHandler("start", start))
