@@ -5,6 +5,8 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters
 from telegram import Update
 from telegram.ext import ContextTypes
 from aiohttp import web
+import asyncio
+
 
 # Load regional data
 def load_regions(file_path):
