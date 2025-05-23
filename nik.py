@@ -115,6 +115,19 @@ async def main():
         webhook_url=f"{url}/webhook",  # path bisa disisipkan di URL ini
     )
 
-if __name__ == '__main__':
-    import asyncio
-    asyncio.run(main())
+if __name__ == "__main__":
+    try:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
+    except RuntimeError as e:
+        if str(e) == "Cannot close a running event loop":
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(main())
+        else:
+            raise
+
+# Fix untuk warning: coroutine 'Application.shutdown' was never awaited
+await application.shutdown()
+
+# Fix untuk warning: coroutine 'Application._bootstrap_initialize' was never awaited
+await application._bootstrap_initialize()
