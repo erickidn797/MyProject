@@ -77,20 +77,15 @@ def decode_nik(nik: str):
 async def start(update, context):
     await update.message.reply_text("Bot is running with webhook!")
 
-def main():
-    # Ambil token dari environment
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+async def main():
+    token = os.environ.get("TELEGRAM_TOKEN")
     if not token:
-        raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set")
+        raise ValueError("TELEGRAM_TOKEN environment variable not set")
 
-    # Inisialisasi aplikasi bot
     app = Application.builder().token(token).build()
-
-    # Tambahkan command handler
     app.add_handler(CommandHandler("start", start))
 
-    # Jalankan webhook tanpa async
-    app.run_webhook(
+    await app.run_webhook(
         listen="0.0.0.0",
         port=8443,
         url_path=token,
@@ -124,12 +119,5 @@ async def cek_nik(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == "__main__":
-    try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
-    except RuntimeError as e:
-        if str(e) == "Cannot close a running event loop":
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(main())
-        else:
-            raise
+    import asyncio
+    asyncio.run(main())
