@@ -79,9 +79,9 @@ async def start(update, context):
 
 def main():
     # Ambil token dari environment
-    token = os.environ.get("TELEGRAM_TOKEN")
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
     if not token:
-        raise ValueError("TELEGRAM_TOKEN environment variable not set")
+        raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set")
 
     # Inisialisasi aplikasi bot
     app = Application.builder().token(token).build()
