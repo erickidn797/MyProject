@@ -1,14 +1,11 @@
 import os
 import re
 from datetime import datetime
-from telegram.ext import ApplicationBuilder, MessageHandler, filters, Application, CommandHandler
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram import Update
-from telegram.ext import ContextTypes
-from aiohttp import web
 import asyncio
 
-
-# Load regional data
+# Load regional data (pastikan file regions.txt ada dan benar formatnya)
 def load_regions(file_path):
     regions = {}
     with open(file_path, 'r') as file:
@@ -32,7 +29,7 @@ def load_regions(file_path):
 
 regions = load_regions('regions.txt')
 
-# Decode NIK
+# Fungsi decode NIK
 def decode_nik(nik: str):
     if len(nik) != 16 or not nik.isdigit():
         return None
@@ -74,25 +71,11 @@ def decode_nik(nik: str):
         "registration_number": reg_number
     }
 
-async def start(update, context):
+# Handler /start
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Bot is running with webhook!")
 
-async def main():
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    if not token:
-        raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set")
-
-    app = Application.builder().token(token).build()
-    app.add_handler(CommandHandler("start", start))
-
-    await app.run_webhook(
-        listen="0.0.0.0",
-        port=8443,
-        url_path=token,
-        webhook_url=f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}/{token}"
-    )
-    
-# Bot handler
+# Handler untuk cek NIK
 async def cek_nik(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = update.message.text.strip()
     match = re.match(r'^Cek (\d{16})$', message_text, re.IGNORECASE)
@@ -116,8 +99,22 @@ async def cek_nik(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(response)
 
+async def main():
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if not token:
+        raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set")
 
+    app = Application.builder().token(token).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, cek_nik))
+
+    await app.run_webhook(
+        listen="0.0.0.0",
+        port=8443,
+        url_path=token,
+        webhook_url=f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}/{token}"
+    )
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(main())
