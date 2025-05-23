@@ -3,7 +3,9 @@ import re
 from datetime import datetime
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram import Update
-import asyncio
+import nest_asyncio
+nest_asyncio.apply()
+
 
 # Load regional data (pastikan file regions.txt ada dan benar formatnya)
 def load_regions(file_path):
@@ -72,9 +74,9 @@ def decode_nik(nik: str):
     }
 
 # Handler /start
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Bot is running with webhook!")
-
+async def start(update, context):
+    await update.message.reply_text("Bot running!")
+    
 # Handler untuk cek NIK
 async def cek_nik(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = update.message.text.strip()
@@ -117,5 +119,5 @@ async def main():
     )
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    import asyncio
+    asyncio.run(main())
